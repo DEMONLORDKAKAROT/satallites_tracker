@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Index.html</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+
+    <script src="https://unpkg.com/globe.gl"></script>
+</head>
+<body>
+
+    <div id="info-box">
+        <span id="info-name"></span>
+        <button onclick="document.getElementById('info-box').style.display='none'">✕</button>
+    </div>
+
+    <div id="controls">
+        <button onclick="load_sat('all')">All</button>
+        <button onclick="load_sat('starlink')">Starlink</button>
+        <button onclick="load_sat('ISS')">ISS</button>
+        <button onclick="load_sat('GPS')">GPS</button>
+        <input id="search" type="text" placeholder="Search satellite..." onkeydown="if(event.key==='Enter') load_sat_search(this.value)">
+    </div>
+
+
+    
+
+    <div id="globe"></div>
+
+
+
+        <script>
+        const globe = Globe().globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+        globe(document.getElementById('globe'))
+        globe.atmosphereColor('lightskyblue').atmosphereAltitude(0.15)
+
+        
+
+
+        let all_sat = []
+        let current_catg = "all"
+
+        function load_sat(category){
+            current_catg = category
+            fetch('/satellites?category=' + category)
+            .then(res => res.json())
+            .then(data => {
+                all_sat = data
+                globe.particlesData([{ particles: data }])
+                .particlesList(d => d.particles)
+                .particleLabel(() => '')
+                .particleLat(d => d.lat)
+                .particleLng(d => d.lng)
+                .particleAltitude(d => d.alt / 6371)
+                .particlesColor(() => 'cyan')
+                .particlesSize(() => 1)
+            })
+        }
+
+
+        setInterval(() => load_sat(current_catg), 5000)
+        
+        load_sat(current_catg)
+
+
+    globe.onParticleClick((particle, event, coords) => {
+        const x = event.clientX
+        const y = event.clientY
+        fetch(`/nearest?lat=${coords.lat}&lng=${coords.lng}&category=${current_catg}`)
+        .then(res => res.json())
+        .then(sat => {
+            const box = document.getElementById('info-box')
+            document.getElementById('info-name').innerText = sat.name
+            box.style.display = 'block'
+            box.style.left = (x + 10) + 'px'
+            box.style.top = (y + 10) + 'px'
+        })
+    })
+
+    globe.onGlobeClick(() => {
+        document.getElementById('info-box').style.display = 'none'
+    })
+            
+
+
+    function load_sat_search(query){
+
+        const q = query.trim().toLowerCase()
+
+        if(q === '' || q === 'all'){
+            load_sat('all')
+            return
+        }
+        if(q === 'starlink'){
+            load_sat('starlink')
+            return
+        }
+        if(q === 'iss'){
+            load_sat('ISS')
+            return
+        }
+        if(q === 'gps'){
+            load_sat('GPS')
+            return
+        }
+        current_catg = query
+        fetch('/satellites?category=' + query)
+        .then(res => res.json())
+        .then(data => {
+            all_sat = data
+            globe.particlesData([{ particles: data }])
+            .particlesList(d => d.particles)
+            .particleLabel(() => '')
+            .particleLat(d => d.lat)
+            .particleLng(d => d.lng)
+            .particleAltitude(d => d.alt / 6371)
+            .particlesColor(() => 'cyan')
+            .particlesSize(() => 1)
+        })
+    }
+
+        
+    </script>
+
+</body>
+</html>

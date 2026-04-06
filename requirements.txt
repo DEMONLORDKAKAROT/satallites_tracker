@@ -1,0 +1,5 @@
+flask
+requests
+sgp4
+scipy
+numpy
