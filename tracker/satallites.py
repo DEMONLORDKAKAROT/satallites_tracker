@@ -9,13 +9,8 @@ from scipy.spatial import cKDTree
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 
-
-
-
 ORIGINAL_DATA = "data.txt"
-MODIFIED_DATA = "data_m.txt"
 tle_data = None
-
 
 URL = "https://tle.ivanstanojevic.me/api/tle/?page-size=100&page="
 
@@ -34,16 +29,11 @@ def write_to_txt(data, name):
            f.write(json.dumps(satellite))
            f.write("\n")
 
-
 def get_data_from_txt(name):
     
     with open(name, "r") as f:
         return [json.loads(line) for line in f if line.strip()]
     
-
-
-    
-
 def get_sat_data()-> list[dict]:
 
     page = 1
@@ -64,19 +54,15 @@ def get_sat_data()-> list[dict]:
 
     return results
 
-
 def get_kd_tree(data):
 
     coords = np.array([[s['lat'], s['lng']] for s in data])
     return cKDTree(coords)
 
-
 def tree_search(tree,data,lat,lng):
 
     _ ,index = tree.query([lat, lng])
     return data[index]
-
-
 
 def get_position(satalite_data):
 
@@ -118,17 +104,11 @@ def get_position(satalite_data):
 
     return error, position, velocity
 
-
-
 def get_tle_data():
     global tle_data
     if tle_data is None:
         tle_data = get_data_from_txt(ORIGINAL_DATA)
     return tle_data
-
-
-            
-
 
 def filter_satellite(data, category):
 
@@ -136,8 +116,6 @@ def filter_satellite(data, category):
         return data
     
     return [s for s in data if category.lower() in s["name"].lower()]
-
-
 
 def get_all_positions(category):
 
@@ -165,52 +143,4 @@ def get_all_positions(category):
         })
 
     return satellite_info
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

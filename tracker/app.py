@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, send_from_directory, request
-from tracker.satallites import *
+from satallites import *
 
 
 tle = get_tle_data()
