@@ -106,8 +106,15 @@ def get_position(satalite_data):
 
 def get_tle_data():
     global tle_data
+    
     if tle_data is None:
-        tle_data = get_data_from_txt(ORIGINAL_DATA)
+        if Path(ORIGINAL_DATA).is_file():
+            tle_data = get_data_from_txt(ORIGINAL_DATA)
+        else:
+            # fetch from API and save
+            tle_data = get_sat_data()
+            write_to_txt(tle_data, ORIGINAL_DATA)
+
     return tle_data
 
 def filter_satellite(data, category):
